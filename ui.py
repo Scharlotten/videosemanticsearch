@@ -31,8 +31,8 @@ st.title("Welcome to the Olympics 2024")
 st.image("paris_olympics.jpg", width=200)
 
 
-sport_list = ["Swimming", "Football", "Other"]
-tab1, tab2, tab3 = st.tabs(sport_list)
+sport_list = ["Swimming", "Other"]
+tab1, tab2 = st.tabs(sport_list)
 
 
 with tab1:
@@ -50,9 +50,6 @@ with tab1:
 
 with tab2:
    st.header(sport_list[1])
-
-with tab3:
-   st.header(sport_list[2])
    uploaded_file = st.file_uploader("Choose a file")
    url_input = st.text_input("Or paste video URL here", key="youtube")
    text_input2 = st.text_input("What do you enjoy watching?")
