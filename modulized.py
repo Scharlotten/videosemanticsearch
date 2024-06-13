@@ -125,7 +125,7 @@ if __name__ == "__main__":
     a = vectorize_video(cap, model, prepocess, device, i, my_database, video_name=video_path)
     # position = get_most_similar_frame("The moment swimmers reach the end of the pool and the final score is displayed", model)
     position = get_most_similar_frame("Crowd cheering happily.", model, device, my_collection, video_name=video_path)
-    minutes = floor(position*0.001/60)
-    seconds = position*00.1/60 - (minutes*60)
+    minutes = position // 1000 // 60
+    seconds = (position // 1000) % 60
     logger.info(f"Position {minutes} minutes and {seconds} seconds ")
     ffmpeg_extract_subclip(video_path, position*0.001-3, position*0.001+15, targetname="interest_2.mp4")
