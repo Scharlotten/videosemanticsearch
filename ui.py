@@ -49,52 +49,49 @@ with tab1:
         st.video("swimming.mp4", start_time=position*0.001)  
 
 with tab2:
-   st.header(sport_list[1])
-   uploaded_file = st.file_uploader("Choose a file")
-   url_input = st.text_input("Or paste video URL here", key="youtube")
-   text_input2 = st.text_input("What do you enjoy watching?")
-if url_input:
-    st.video(url_input)
+    st.header(sport_list[1])
+    uploaded_file = st.file_uploader("Choose a file")
+    url_input = st.text_input("Or paste video URL here", key="youtube")
+    text_input = st.text_input("What do you enjoy watching?")
+
+    if url_input:
+        st.video(url_input)
+        
+        yt = YouTube(url_input)
     
-    yt = YouTube(url_input)
-   
-    path = os.path.join(os.path.dirname(__file__), 'Videos')
-    filename = datetime.now().strftime("%Y%m%d_%H%M%S.mp4")
-    full_path = os.path.join(path, filename)
-    YouTube(url_input).streams.first().download(path, filename)
-    
-    client, database = connect_to_vectordb()
-    collection = configure_collection(database)
-    model, prepocess, device = load_model()
-    cap = load_video(full_path)
-    logger.info(f"{cap.get(cv2.CAP_PROP_POS_MSEC)} is the number of frames")
-    i = load_saved_state(filename)
-    a = vectorize_video(cap, model, prepocess, device, i, database, collection, filename)
-    position = get_most_similar_frame(text_input2, model, device, collection, filename)
-    logger.info(f"Position {floor(position*0.001/60)}")
-
-
-    
-
-
-if uploaded_file is not None:
-    bytes_data = uploaded_file.getvalue()
-    # To read file as bytes:
-    with open(uploaded_file.name, "wb") as binary_file:
-    # Write bytes to file
-        binary_file.write(bytes_data)
-    vid = st.video(bytes_data)    
-
-if url_input or uploaded_file:
-    if text_input2:
-        my_client, my_database = connect_to_vectordb() 
-        my_collection = configure_collection(my_database)
-        vid.empty()
+        path = os.path.join(os.path.dirname(__file__), 'Videos')
+        filename = datetime.now().strftime("%Y%m%d_%H%M%S.mp4")
+        full_path = os.path.join(path, filename)
+        YouTube(url_input).streams.first().download(path, filename)
+        
+        client, database = connect_to_vectordb()
+        collection = configure_collection(database)
         model, prepocess, device = load_model()
-        position = get_most_similar_frame(text_input2, model, device, my_collection)
+        cap = load_video(full_path)
+        logger.info(f"{cap.get(cv2.CAP_PROP_POS_MSEC)} is the number of frames")
+        i = load_saved_state(filename)
+        a = vectorize_video(cap, model, prepocess, device, i, database, collection, filename)
+        position = get_most_similar_frame(text_input, model, device, collection, filename)
         logger.info(f"Position {floor(position*0.001/60)}")
-        cur.empty()
-        st.video(uploaded_file, start_time=position*0.001-3)
+
+    if uploaded_file is not None:
+        bytes_data = uploaded_file.getvalue()
+        # To read file as bytes:
+        with open(uploaded_file.name, "wb") as binary_file:
+        # Write bytes to file
+            binary_file.write(bytes_data)
+        vid = st.video(bytes_data)    
+
+    if url_input or uploaded_file:
+        if text_input:
+            my_client, my_database = connect_to_vectordb() 
+            my_collection = configure_collection(my_database)
+            vid.empty()
+            model, prepocess, device = load_model()
+            position = get_most_similar_frame(text_input, model, device, my_collection)
+            logger.info(f"Position {floor(position*0.001/60)}")
+            cur.empty()
+            st.video(uploaded_file, start_time=position*0.001-3)
 
    
 
