@@ -69,10 +69,8 @@ def load_saved_state(video_name=os.environ.get("VIDEO")):
             logger.info("Starting count from 0")
     return i
 
-def vectorize_video(cap, model, preprocess, device, saved_progress, database,
-                     str_collection="video",
+def vectorize_video(cap, model, preprocess, device, saved_progress, collection,
                        video_name=os.environ.get("VIDEO")):
-    collection = database.get_collection(str_collection)
     frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     print(frame_count)
     # Everything is divided by 8 because it would be too costly to calculate an embedding for every fps
@@ -81,7 +79,7 @@ def vectorize_video(cap, model, preprocess, device, saved_progress, database,
         image_vectors = torch.zeros((round(frame_count/8), 512), device=device)
         logger.info(f"Created a list of tensors {frame_count/8}")
         cur_state = {video_name: 0}
-        for j in tqdm(range(saved_progress, round(frame_count/8))):
+        for j in tqdm(range(saved_progress, frame_count//8)):
             cap.set(cv2.CAP_PROP_POS_FRAMES, j*8)   
             ret, frame = cap.read()
             with torch.no_grad():
@@ -122,7 +120,7 @@ if __name__ == "__main__":
     model, prepocess, device = load_model()
     cap = load_video(video_path)
     i = load_saved_state(video_path)
-    a = vectorize_video(cap, model, prepocess, device, i, my_database, video_name=video_path)
+    a = vectorize_video(cap, model, prepocess, device, i, my_collection, video_name=video_path)
     # position = get_most_similar_frame("The moment swimmers reach the end of the pool and the final score is displayed", model)
     position = get_most_similar_frame("Crowd cheering happily.", model, device, my_collection, video_name=video_path)
     minutes = position // 1000 // 60

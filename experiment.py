@@ -24,7 +24,7 @@ def main():
     cap = load_video(os.path.join(path, yt.title))
     logger.info(f"{cap.get(cv2.CAP_PROP_FRAME_COUNT)} is the number of frames")
     i = load_saved_state(yt.title)
-    a = vectorize_video(cap, model, prepocess, device, i, database, collection, yt.title)
+    a = vectorize_video(cap, model, prepocess, device, i, collection, yt.title)
     position = get_most_similar_frame(text_input, model, device, collection, yt.tile)
     logger.info(f"Position {floor(position*0.001/60)}")
 

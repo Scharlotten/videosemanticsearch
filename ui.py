@@ -58,10 +58,11 @@ with tab2:
     filename = datetime.now().strftime("%Y%m%d_%H%M%S.mp4")
 
     if url_input:
-        YouTube(url_input).streams.first().download(path, filename)
+        vid = st.video(url_input)
+        yt =  YouTube(url_input)
+        filename = yt.title
+        yt.streams.first().download(path, filename)
         
-        with open(os.path.join(path, filename), "rb") as binary_file:
-            vid = st.video(binary_file.read())
         
     if uploaded_file is not None:
         bytes_data = uploaded_file.getvalue()
@@ -80,11 +81,11 @@ with tab2:
         cap = load_video(full_path)
         logger.info(f"{cap.get(cv2.CAP_PROP_POS_MSEC)} is the number of frames")
         i = load_saved_state(filename)
-        a = vectorize_video(cap, model, prepocess, device, i, my_database, my_collection, filename)
+        a = vectorize_video(cap, model, prepocess, device, i, my_collection, filename)
         position = get_most_similar_frame(text_input, model, device, my_collection, filename)
-        logger.info(f"Position {floor(position*0.001/60)}")
+        logger.info(f"Position {int(position/1000)//60}:{int(position/1000) %60}")
         vid.empty()
-        st.video(uploaded_file, start_time=position*0.001-3)
+        st.video(url_input or uploaded_file, start_time=position*0.001-3)
 
    
 
