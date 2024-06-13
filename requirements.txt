@@ -1,0 +1,7 @@
+clip
+opencv-python
+tqdm 
+torch
+astrapy
+python-dotenv
+moviepy

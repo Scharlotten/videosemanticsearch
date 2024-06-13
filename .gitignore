@@ -1,0 +1,7 @@
+.env
+.venv/
+*.pickle
+*.mp4
+launch.json
+Videos/
+*.pyc
