@@ -26,6 +26,9 @@ def main():
     i = load_saved_state(yt.title)
     a = vectorize_video(cap, model, prepocess, device, i, collection, yt.title)
     position = get_most_similar_frame(text_input, model, device, collection, yt.tile)
+    minutes = position // 1000 // 60
+    seconds = (position // 1000) % 60
+    logger.info(f"Position {minutes} minutes and {seconds} seconds ")
     logger.info(f"Position {floor(position*0.001/60)}")
 
 if __name__ == "__main__":

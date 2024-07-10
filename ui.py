@@ -19,9 +19,10 @@ from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from math import floor 
 from pytube import YouTube
 from modulized import load_model, get_most_similar_frame, load_video, load_saved_state, vectorize_video, connect_to_vectordb, configure_collection
+import re
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+load_dotenv(dotenv_path, override=True)
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,15 @@ st.image("paris_olympics.jpg", width=200)
 sport_list = ["Swimming", "Other"]
 tab1, tab2 = st.tabs(sport_list)
 
+@st.cache_resource
+def get_db_conn():
+    my_client, my_database = connect_to_vectordb() 
+    return my_client, my_database
+
+@st.cache_data
+def load_ai_model():
+    model, prepocess, device = load_model()
+    return model, prepocess, device
 
 with tab1:
    st.header(sport_list[0])
@@ -60,8 +70,11 @@ with tab2:
     if url_input:
         vid = st.video(url_input)
         yt =  YouTube(url_input)
-        filename = yt.title
+        s = yt.title
+        s = re.sub("[a-zA-z]*\\|", "", s)
+        filename = s + ".mp4"
         yt.streams.first().download(path, filename)
+        logger.info(f"Successfully donwloaded file {filename}")
         
         
     if uploaded_file is not None:
@@ -74,32 +87,22 @@ with tab2:
         vid = st.video(bytes_data)    
 
     if (url_input or uploaded_file) and text_input:
-        my_client, my_database = connect_to_vectordb() 
+        my_client, my_database = get_db_conn()
         my_collection = configure_collection(my_database)
-        model, prepocess, device = load_model()
+        model, prepocess, device = load_ai_model()
         full_path = os.path.join(path, filename)
         cap = load_video(full_path)
         logger.info(f"{cap.get(cv2.CAP_PROP_POS_MSEC)} is the number of frames")
         i = load_saved_state(filename)
         a = vectorize_video(cap, model, prepocess, device, i, my_collection, filename)
+
         position = get_most_similar_frame(text_input, model, device, my_collection, filename)
         logger.info(f"Position {int(position/1000)//60}:{int(position/1000) %60}")
+        st.write(f"Video position is: {position}")
         vid.empty()
         st.video(url_input or uploaded_file, start_time=position*0.001-3)
 
    
-
-# with st.sidebar:
-#     genre = st.radio(
-#     "What do you enjoy watching?",
-#     [":swimmer: Swimming", ":soccer: Football", ":rowboat: kayak", ":horse_racing: Showjump", ":rainbow[Other]"],
-#     #captions = ["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
-#     )
-#     if genre == ":rainbow[Other]":
-#         pass
-        
-#     else:
-#         st.write("You didn't select comedy.")
 
 
 

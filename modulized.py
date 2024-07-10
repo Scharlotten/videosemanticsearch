@@ -32,10 +32,13 @@ def connect_to_vectordb():
 
 
 def configure_collection(database, collection=os.environ.get("COLLECTION")):
+    print(database.list_collection_names())
     if collection not in database.list_collection_names():
+        
         my_collection = database.create_collection(
             collection,
             dimension=512,
+            #keyspace="asemjen-demo",
             metric=astrapy.constants.VectorMetric.COSINE)
         logger.info(f"Created {collection} collection")
     else:
@@ -109,11 +112,15 @@ def get_most_similar_frame(query: str, model, device, my_collection, video_name=
     query_vector = model.encode_text(clip.tokenize([query]).to(device))
     example = query_vector.tolist()[0]
     result = my_collection.find_one({"file": video_name}, vector=example)
+    print(example)
     return result.get("position")
 
 from math import floor
 if __name__ == "__main__":
+    dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+    load_dotenv(dotenv_path, override=True)
     video_path = os.environ.get("VIDEO")
+    #video_path = "swimming.mp4"
     logger.info(f"This is the video {video_path}")
     my_client, my_database = connect_to_vectordb() 
     my_collection = configure_collection(my_database)
@@ -121,9 +128,10 @@ if __name__ == "__main__":
     cap = load_video(video_path)
     i = load_saved_state(video_path)
     a = vectorize_video(cap, model, prepocess, device, i, my_collection, video_name=video_path)
-    # position = get_most_similar_frame("The moment swimmers reach the end of the pool and the final score is displayed", model)
-    position = get_most_similar_frame("Crowd cheering happily.", model, device, my_collection, video_name=video_path)
+    position = get_most_similar_frame("Swimmers stop swimming - race is over", model, device, my_collection, video_path)
+    #position = get_most_similar_frame("Crowd cheering happily.", model, device, my_collection, video_name=video_path)
     minutes = position // 1000 // 60
     seconds = (position // 1000) % 60
     logger.info(f"Position {minutes} minutes and {seconds} seconds ")
     ffmpeg_extract_subclip(video_path, position*0.001-3, position*0.001+15, targetname="interest_2.mp4")
+    #The moment swimmers reach the end of the pool and the final score is displayed race stops
