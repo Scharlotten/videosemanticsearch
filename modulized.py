@@ -111,9 +111,10 @@ def vectorize_video(cap, model, preprocess, device, saved_progress, collection,
 def get_most_similar_frame(query: str, model, device, my_collection, video_name=os.environ.get("VIDEO")):
     query_vector = model.encode_text(clip.tokenize([query]).to(device))
     example = query_vector.tolist()[0]
-    result = my_collection.find_one({"file": video_name}, vector=example)
+    result = my_collection.find_one({"file": video_name}, vector=example, include_similarity=True)
     print(example)
-    return result.get("position")
+   
+    return result.get("position"), result.get("$similarity")
 
 from math import floor
 if __name__ == "__main__":
@@ -128,10 +129,12 @@ if __name__ == "__main__":
     cap = load_video(video_path)
     i = load_saved_state(video_path)
     a = vectorize_video(cap, model, prepocess, device, i, my_collection, video_name=video_path)
-    position = get_most_similar_frame("Swimmers stop swimming - race is over", model, device, my_collection, video_path)
+    position, similarity = get_most_similar_frame("Swimmers stop swimming - race is over", model, device, my_collection, video_path)
     #position = get_most_similar_frame("Crowd cheering happily.", model, device, my_collection, video_name=video_path)
     minutes = position // 1000 // 60
     seconds = (position // 1000) % 60
     logger.info(f"Position {minutes} minutes and {seconds} seconds ")
-    ffmpeg_extract_subclip(video_path, position*0.001-3, position*0.001+15, targetname="interest_2.mp4")
+    #ffmpeg_extract_subclip(video_path, position*0.001-4, position*0.001+15, targetname="interest_2.mp4")
     #The moment swimmers reach the end of the pool and the final score is displayed race stops
+    #swimmers before jumping into the pool
+    # swimmer wins

@@ -1,14 +1,11 @@
 import streamlit as st
 from io import StringIO
 from datetime import datetime
-import astrapy
 import logging
 import astrapy.database
-import clip
 import cv2
 import matplotlib.pyplot as plt
 import seaborn as sns
-import torch
 from PIL import Image
 from tqdm import tqdm
 import astrapy
@@ -17,9 +14,11 @@ from dotenv import load_dotenv
 from picklehelpers import save, load
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from math import floor 
-from pytube import YouTube
+from pytubefix import YouTube
 from modulized import load_model, get_most_similar_frame, load_video, load_saved_state, vectorize_video, connect_to_vectordb, configure_collection
 import re
+from call_langflow import call_langflow
+from datetime import timedelta
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path, override=True)
@@ -28,8 +27,8 @@ load_dotenv(dotenv_path, override=True)
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-st.title("Welcome to the Olympics 2024")
-st.image("paris_olympics.jpg", width=200)
+st.title("Search Videos - by text")
+#st.image("paris_olympics.jpg", width=200)
 
 
 sport_list = ["Swimming", "Other"]
@@ -47,16 +46,25 @@ def load_ai_model():
 
 with tab1:
    st.header(sport_list[0])
-   cur = st.video("swimming.mp4")
+   cur = st.video("Videos/XpwUwDGo9Ds.mp4")
    text_input = st.text_input( "What do you enjoy watching?", key="Pre-defined")
+   text_input2 = st.text_input("How would you search the audio stream?", key="Pre-defined2")
    if text_input:
         my_client, my_database = connect_to_vectordb() 
         my_collection = configure_collection(my_database)
         model, prepocess, device = load_model()
-        position = get_most_similar_frame(text_input, model, device, my_collection)
+        position, similarity = get_most_similar_frame(text_input, model, device, my_collection)
         logger.info(f"Position {floor(position*0.001/60)}")
         cur.empty()
-        st.video("swimming.mp4", start_time=position*0.001)  
+        st.video("Videos/XpwUwDGo9Ds.mp4", start_time=position*0.001)  #first second and third places are displayed in the swim lanes on the pool 
+        #1 2 and 3rd  places are displayed in the swim lanes on the pool race stops
+        st.text(similarity)
+        # Do the same for the audio part
+   
+   if text_input2:
+        time, sentence = call_langflow(text_input2)
+        st.text(f"Audio data {sentence} at {str(timedelta(seconds=time))}")
+        st.video("Videos/XpwUwDGo9Ds.mp4", start_time=time)
 
 with tab2:
     st.header(sport_list[1])
@@ -70,9 +78,9 @@ with tab2:
     if url_input:
         vid = st.video(url_input)
         yt =  YouTube(url_input)
-        s = yt.title
-        s = re.sub("[a-zA-z]*\\|", "", s)
-        filename = s + ".mp4"
+        # s = yt.title
+        # s = re.sub("[a-zA-z]*\\|", "", s)
+        filename = yt.video_id + ".mp4"
         yt.streams.first().download(path, filename)
         logger.info(f"Successfully donwloaded file {filename}")
         
@@ -96,9 +104,10 @@ with tab2:
         i = load_saved_state(filename)
         a = vectorize_video(cap, model, prepocess, device, i, my_collection, filename)
 
-        position = get_most_similar_frame(text_input, model, device, my_collection, filename)
+        position, similarity = get_most_similar_frame(text_input, model, device, my_collection, filename)
         logger.info(f"Position {int(position/1000)//60}:{int(position/1000) %60}")
         st.write(f"Video position is: {position}")
+
         vid.empty()
         st.video(url_input or uploaded_file, start_time=position*0.001-3)
 
