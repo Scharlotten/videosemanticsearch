@@ -25,7 +25,7 @@ A powerful semantic search application that enables you to search through video 
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/Scharlotten/videosemanticsearch.git
 cd video-semantic-search
 ```
 
@@ -95,16 +95,6 @@ The application will open in your default web browser, typically at `http://loca
 3. **Search**: Enter natural language queries to find relevant video segments
 4. **Results**: Browse through semantically matched results with relevance scores
 
-## 🏗️ Project Structure
-
-```
-video-semantic-search/
-├── ui.py                 # Streamlit web interface
-├── requirements.txt      # Python dependencies
-├── .env_template        # Environment variables template
-├── .env                 # Your configuration (create from template)
-└── README.md           # This file
-```
 
 ## 🔧 Technologies Used
 
@@ -134,15 +124,6 @@ AstraDB is a cloud-native database built on Apache Cassandra, offering:
    - Check that all required variables are set
    - Restart the application after making changes
 
-2. **AstraDB Connection Issues**
-   - Verify your database credentials
-   - Ensure your database is active and running
-   - Check your network connection
-
-3. **Python Dependencies**
-   - Make sure you're using Python 3.12.3+
-   - Try upgrading pip: `pip install --upgrade pip`
-   - Install dependencies in a virtual environment if needed
 
 ### Getting Help
 
@@ -150,13 +131,6 @@ AstraDB is a cloud-native database built on Apache Cassandra, offering:
 - [AstraDB Documentation](https://docs.datastax.com/en/astra/docs/)
 - [DataStax Community](https://community.datastax.com/)
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🔗 Useful Links
 
