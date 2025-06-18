@@ -63,8 +63,11 @@ with tab1:
    
    if text_input2:
         time, sentence = call_langflow(text_input2)
-        st.text(f"Audio data {sentence} at {str(timedelta(seconds=time))}")
-        st.video("Videos/XpwUwDGo9Ds.mp4", start_time=time)
+        try:
+            st.text(f"Audio data {sentence} at {str(timedelta(seconds=time))}")
+            st.video("Videos/XpwUwDGo9Ds.mp4", start_time=time)
+        except:
+            pass
 
 with tab2:
     st.header(sport_list[1])

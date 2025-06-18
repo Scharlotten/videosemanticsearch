@@ -21,12 +21,14 @@ def call_langflow(message_input:str):
     }
 
     json_data = {
-        'input_value': message_input,
+        'input_value': message_input,# give me a sentene that the race is over
         'output_type': 'chat',
         'input_type': 'chat',
     }
 
-    response = requests.post('https://api.langflow.astra.datastax.com/lf/f2fa8022-32cc-4137-8887-358cb1476ea6/api/v1/run/a7dfb0ef-11be-402e-8f5d-0f0536547b69', params=params, headers=headers, json=json_data)
+    response = requests.post(os.environ["LANGFLOW_PATH"], 
+                            
+                             params=params, headers=headers, json=json_data)
 
     # Note: json_data will not be serialized by requests
     # exactly as it was in the original request.
@@ -40,8 +42,10 @@ def call_langflow(message_input:str):
         sentence = output_dict.get("Answer")
     except Exception as e:
         print(f"Failed to query data {e}")
-
+    print(response.text)
     print(time)
     print(sentence)
     return time, sentence
 
+if __name__ == "__main__":
+    call_langflow("Please indicate the sentence that is closest to finishing the game ")
